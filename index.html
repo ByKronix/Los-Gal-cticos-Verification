@@ -77,32 +77,27 @@
   </main>
 
   <script>
-    /*
-      CONFIGURACIÓN PENDIENTE:
-      1) Crea una aplicación en https://discord.com/developers/applications
-      2) Configura OAuth2 y una URL de redirección HTTPS de tu backend.
-      3) Sustituye CLIENT_ID y OAUTH_REDIRECT_URI.
-      4) El backend debe validar el código OAuth2 y asignar el rol usando
-         un bot con permisos adecuados. Nunca pongas el token del bot aquí.
-    */
-    const CLIENT_ID = "TU_CLIENT_ID_DE_DISCORD";
-    const OAUTH_REDIRECT_URI = "https://TU-DOMINIO.com/callback";
-
     const notice = document.getElementById("notice");
+
+    const messages = {
+      verified: "¡Verificación completada! Ya tienes el rol Verificado. Puedes regresar a Discord.",
+      not_member: "No encontramos tu cuenta dentro del servidor LOS GALÁCTICOS. Primero debes unirte al servidor y después intentarlo de nuevo.",
+      cancelled: "Cancelaste la autorización de Discord. No se realizó ningún cambio en tus roles.",
+      oauth_error: "No se pudo completar la autorización con Discord. Inténtalo nuevamente.",
+      server_error: "No se pudo completar la verificación. Contacta con el equipo de moderación."
+    };
+
+    const status = new URLSearchParams(window.location.search).get("status");
+    if (status && messages[status]) {
+      notice.textContent = messages[status];
+      notice.classList.add("show");
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     document.getElementById("accept").addEventListener("click", () => {
-      if (CLIENT_ID.startsWith("TU_") || OAUTH_REDIRECT_URI.includes("TU-DOMINIO")) {
-        notice.textContent = "La página visual está lista. Para activar la verificación real, el administrador debe conectar la aplicación de Discord y configurar el servidor seguro indicado en los comentarios del archivo.";
-        notice.classList.add("show");
-        return;
-      }
-      const params = new URLSearchParams({
-        client_id: CLIENT_ID,
-        response_type: "code",
-        redirect_uri: OAUTH_REDIRECT_URI,
-        scope: "identify"
-      });
-      window.location.href = "https://discord.com/oauth2/authorize?" + params.toString();
+      window.location.href = "/api/login";
     });
+
     document.getElementById("decline").addEventListener("click", () => {
       notice.textContent = "Has elegido no verificarte. No se te asignará el rol de miembro verificado y no tendrás acceso a los canales privados. Puedes cerrar esta página.";
       notice.classList.add("show");
