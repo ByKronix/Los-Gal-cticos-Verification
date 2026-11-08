@@ -87,9 +87,10 @@ module.exports = async function handler(req, res) {
       })
     });
 
-    if (!tokenResponse.ok) {
-      return goHome(res, "oauth_error");
-    }
+   if (!tokenResponse.ok) {
+  console.error("ERROR_TOKEN:", tokenResponse.status);
+  return goHome(res, "oauth_error");
+}
 
     const tokenData = await tokenResponse.json();
     if (!tokenData.access_token) {
@@ -100,9 +101,10 @@ module.exports = async function handler(req, res) {
       headers: { Authorization: `Bearer ${tokenData.access_token}` }
     });
 
-    if (!userResponse.ok) {
-      return goHome(res, "oauth_error");
-    }
+   if (!userResponse.ok) {
+  console.error("ERROR_USER:", userResponse.status);
+  return goHome(res, "oauth_error");
+}
 
     const user = await userResponse.json();
 
@@ -115,8 +117,9 @@ module.exports = async function handler(req, res) {
       return goHome(res, "not_member");
     }
     if (!memberResponse.ok) {
-      return goHome(res, "server_error");
-    }
+  console.error("ERROR_MEMBER:", memberResponse.status);
+  return goHome(res, "server_error");
+}
 
     const addRoleResponse = await fetch(
       `https://discord.com/api/v10/guilds/${encodeURIComponent(guildId)}/members/${encodeURIComponent(user.id)}/roles/${encodeURIComponent(verifiedRoleId)}`,
@@ -124,20 +127,23 @@ module.exports = async function handler(req, res) {
     );
 
     if (!addRoleResponse.ok) {
-      return goHome(res, "server_error");
-    }
+  console.error("ERROR_ADD_ROLE:", addRoleResponse.status);
+  return goHome(res, "server_error");
+}
 
     const removeRoleResponse = await fetch(
       `https://discord.com/api/v10/guilds/${encodeURIComponent(guildId)}/members/${encodeURIComponent(user.id)}/roles/${encodeURIComponent(unverifiedRoleId)}`,
       { method: "DELETE", headers: { Authorization: `Bot ${botToken}` } }
     );
 
-    if (!removeRoleResponse.ok) {
-      return goHome(res, "server_error");
-    }
+   if (!removeRoleResponse.ok) {
+  console.error("ERROR_REMOVE_ROLE:", removeRoleResponse.status);
+  return goHome(res, "server_error");
+}
 
     return goHome(res, "verified");
-  } catch (_error) {
-    return goHome(res, "server_error");
-  }
+  } catch (error) {
+  console.error("ERROR_CALLBACK:", error.message);
+  return goHome(res, "server_error");
+}
 };
